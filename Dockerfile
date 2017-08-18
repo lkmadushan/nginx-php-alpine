@@ -2,6 +2,20 @@ FROM alpine:edge
 
 MAINTAINER Kalpa Perera
 
+RUN DEBIAN_FRONTEND=noninteractive
+
+ENV LANGUAGE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LC_CTYPE=UTF-8
+ENV TERM xterm
+
+# Ensure www-data user exists
+ARG PUID=1000
+ARG PGID=${PUID}
+RUN addgroup -g ${PGID} -S www-data \
+    && adduser -u ${PUID} -D -S -G www-data www-data
+
 # Install packages from stable repo's
 RUN apk --no-cache add supervisor curl
 
@@ -29,9 +43,22 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 # Configure supervisord
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Configure timezone
+ARG TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone
+
+# Configure crontab
+COPY crontab /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
+RUN touch /var/log/cron.log \
+    && ln -sf /dev/stderr /var/log/cron.log
+
 # Application directory
 RUN mkdir -p /var/www/html
-WORKDIR /var/www/html
+
+RUN chown -R www-data: /var/www
+RUN chmod 755 /var/www
 
 EXPOSE 80 443
 
