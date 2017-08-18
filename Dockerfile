@@ -50,7 +50,7 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
 
 # Configure crontab
 COPY crontab /etc/cron.d/crontab
-RUN chmod 0644 /etc/cron.d/crontab
+RUN chmod 644 /etc/cron.d/crontab
 RUN touch /var/log/cron.log \
     && ln -sf /dev/stderr /var/log/cron.log
 
