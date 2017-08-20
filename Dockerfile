@@ -11,7 +11,7 @@ ENV LC_CTYPE=UTF-8
 ENV TERM xterm
 
 # Ensure www-data user exists
-ARG PUID=33
+ARG PUID=82
 ARG PGID=${PUID}
 RUN addgroup -g ${PGID} -S www-data \
     && adduser -u ${PUID} -D -S -G www-data www-data
