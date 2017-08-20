@@ -11,7 +11,7 @@ ENV LC_CTYPE=UTF-8
 ENV TERM xterm
 
 # Ensure www-data user exists
-ARG PUID=1000
+ARG PUID=33
 ARG PGID=${PUID}
 RUN addgroup -g ${PGID} -S www-data \
     && adduser -u ${PUID} -D -S -G www-data www-data
@@ -49,10 +49,7 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone
 
 # Configure crontab
-COPY crontab /etc/cron.d/crontab
-RUN chmod 644 /etc/cron.d/crontab
-RUN touch /var/log/cron.log \
-    && ln -sf /dev/stderr /var/log/cron.log
+RUN (crontab -u root -l; echo "* * * * * php /var/www/html/artisan schedule:run >> /dev/null 2>&1" ) | crontab -u root -
 
 # Application directory
 RUN mkdir -p /var/www/html
